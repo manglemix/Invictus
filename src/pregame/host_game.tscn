@@ -1,0 +1,90 @@
+[gd_scene load_steps=7 format=3 uid="uid://cdbyqo833jcrq"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_5lmev"]
+font_size = 80
+
+[sub_resource type="GDScript" id="GDScript_p31xi"]
+script/source = "extends Button
+
+
+func _on_pressed() -> void:
+	WebrtcHost.hosting = true
+	var lobby: Lobby = preload(\"res://src/pregame/lobby.tscn\").instantiate()
+	Main.fade_change_scene(lobby)
+"
+
+[sub_resource type="InputEventAction" id="InputEventAction_3tgdg"]
+action = &"ui_cancel"
+
+[sub_resource type="Shortcut" id="Shortcut_42swu"]
+events = [SubResource("InputEventAction_3tgdg")]
+
+[sub_resource type="GDScript" id="GDScript_gyl4c"]
+script/source = "extends Button
+
+
+func _on_pressed() -> void:
+	Main.fade_change_scene(preload(\"res://src/pregame/main_menu.tscn\").instantiate())
+"
+
+[sub_resource type="GDScript" id="GDScript_cmonb"]
+script/source = "extends Label
+
+
+func _ready() -> void:
+	if !OS.has_feature(\"web\"):
+		queue_free()
+"
+
+[node name="JoinGame" type="VBoxContainer"]
+custom_minimum_size = Vector2(400, 0)
+anchors_preset = 13
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -89.5
+offset_right = 89.5
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 2
+text = "Host"
+label_settings = SubResource("LabelSettings_5lmev")
+horizontal_alignment = 1
+
+[node name="Host" type="Button" parent="."]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 30
+text = "HOST"
+script = SubResource("GDScript_p31xi")
+
+[node name="Back" type="Button" parent="."]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 30
+shortcut = SubResource("Shortcut_42swu")
+text = "BACK"
+script = SubResource("GDScript_gyl4c")
+
+[node name="Control" type="Control" parent="."]
+custom_minimum_size = Vector2(0, 27.395)
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="."]
+layout_mode = 2
+text = "As the host, this window must remain open. The host cannot play at the same time. Players are encouraged to use their phones instead. The host will be able to see the whole game with all secrets exposed."
+autowrap_mode = 3
+
+[node name="Warning" type="Label" parent="."]
+layout_mode = 2
+text = "For the best host experience, you are encouraged to host from the desktop app."
+autowrap_mode = 3
+script = SubResource("GDScript_cmonb")
+
+[connection signal="pressed" from="Host" to="Host" method="_on_pressed"]
+[connection signal="pressed" from="Back" to="Back" method="_on_pressed"]

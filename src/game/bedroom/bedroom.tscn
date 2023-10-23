@@ -1,0 +1,143 @@
+[gd_scene load_steps=10 format=3 uid="uid://dj3fnmncrtgkh"]
+
+[ext_resource type="LightmapGIData" uid="uid://bi2p55i73vf7s" path="res://src/game/bedroom/bedroom.lmbake" id="1_nc1n3"]
+[ext_resource type="Script" path="res://src/game/bedroom/bedroom.gd" id="1_r6p72"]
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_gyngt"]
+viewport_path = NodePath("TextureRect/SubViewport")
+
+[sub_resource type="BoxMesh" id="BoxMesh_0u70i"]
+lightmap_size_hint = Vector2i(44, 51)
+flip_faces = true
+add_uv2 = true
+size = Vector3(4, 2.5, 4)
+
+[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_xjkty"]
+
+[sub_resource type="WorldBoundaryShape3D" id="WorldBoundaryShape3D_sp5dq"]
+plane = Plane(0, 1, 0, -1.25)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_212v1"]
+size = Vector3(0.965, 0.8, 1.905)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ugxnn"]
+size = Vector3(0.965, 0.8, 1.905)
+
+[sub_resource type="GDScript" id="GDScript_o17n6"]
+script/source = "extends Button
+
+
+func _on_pressed() -> void:
+	Main.fade_change_scene(preload(\"res://src/game/vote_fixers/vote_fixers.tscn\").instantiate())
+"
+
+[node name="Bedroom" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 30.0
+offset_bottom = -30.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_r6p72")
+
+[node name="RichTextLabel" type="RichTextLabel" parent="."]
+layout_mode = 2
+bbcode_enabled = true
+text = "[center][font_size=30]This is [i]your[/i] bedroom[/font_size]
+Remember what it looks like. People may move furniture around
+to look for any evidence against you.
+[/center]"
+fit_content = true
+scroll_active = false
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 2
+size_flags_vertical = 3
+texture = SubResource("ViewportTexture_gyngt")
+expand_mode = 3
+stretch_mode = 5
+
+[node name="SubViewport" type="SubViewport" parent="TextureRect"]
+transparent_bg = true
+
+[node name="Camera3D" type="Camera3D" parent="TextureRect/SubViewport"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 9.657, 0)
+fov = 27.1
+
+[node name="Room" type="Node" parent="TextureRect/SubViewport"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="TextureRect/SubViewport/Room"]
+mesh = SubResource("BoxMesh_0u70i")
+skeleton = NodePath("../..")
+
+[node name="SpotLight3D" type="SpotLight3D" parent="TextureRect/SubViewport/Room"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 1, 1.23, 1)
+shadow_enabled = true
+
+[node name="SpotLight3D2" type="SpotLight3D" parent="TextureRect/SubViewport/Room"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -1, 1.23, 1)
+shadow_enabled = true
+
+[node name="SpotLight3D3" type="SpotLight3D" parent="TextureRect/SubViewport/Room"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 1, 1.23, -1)
+shadow_enabled = true
+
+[node name="SpotLight3D4" type="SpotLight3D" parent="TextureRect/SubViewport/Room"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -1, 1.23, -1)
+shadow_enabled = true
+
+[node name="LightmapGI" type="LightmapGI" parent="TextureRect/SubViewport/Room"]
+quality = 0
+bounces = 2
+directional = true
+interior = true
+environment_mode = 0
+camera_attributes = SubResource("CameraAttributesPractical_xjkty")
+generate_probes_subdiv = 1
+light_data = ExtResource("1_nc1n3")
+
+[node name="ReflectionProbe" type="ReflectionProbe" parent="TextureRect/SubViewport/Room"]
+box_projection = true
+interior = true
+enable_shadows = true
+
+[node name="StaticBody3D" type="StaticBody3D" parent="TextureRect/SubViewport/Room"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TextureRect/SubViewport/Room/StaticBody3D"]
+shape = SubResource("WorldBoundaryShape3D_sp5dq")
+
+[node name="Furniture" type="Node" parent="TextureRect/SubViewport"]
+
+[node name="Bed" type="RigidBody3D" parent="TextureRect/SubViewport/Furniture"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.46836, -0.825, -0.991282)
+axis_lock_linear_y = true
+axis_lock_angular_x = true
+axis_lock_angular_z = true
+sleeping = true
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TextureRect/SubViewport/Furniture/Bed"]
+shape = SubResource("BoxShape3D_212v1")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="TextureRect/SubViewport/Furniture/Bed"]
+mesh = SubResource("BoxMesh_ugxnn")
+
+[node name="RichTextLabel2" type="RichTextLabel" parent="."]
+custom_minimum_size = Vector2(450, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+bbcode_enabled = true
+text = "[center][font_size=20]The vote for the 3 people who will be fixing the Oxygen Recycler has already started.
+When you are ready, please leave your room.
+[/font_size][/center]"
+fit_content = true
+scroll_active = false
+
+[node name="LeaveToVote" type="Button" parent="."]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 25
+text = "LEAVE"
+script = SubResource("GDScript_o17n6")
+
+[connection signal="pressed" from="LeaveToVote" to="LeaveToVote" method="_on_pressed"]

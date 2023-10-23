@@ -11,10 +11,25 @@ config_version=5
 [application]
 
 config/name="Invictus"
-run/main_scene="res://main.tscn"
+run/main_scene="res://src/pregame/main_menu.tscn"
 config/features=PackedStringArray("4.1", "Mobile")
 config/icon="res://icon.svg"
+
+[autoload]
+
+Main="*res://src/main.gd"
+WebrtcHost="*res://src/singletons/webrtc_host.gd"
+GameState="*res://src/singletons/game_state.gd"
+
+[display]
+
+window/size/viewport_width=600
+window/size/viewport_height=600
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
 
 [rendering]
 
 renderer/rendering_method="mobile"
+textures/vram_compression/import_etc2_astc=true
+environment/defaults/default_clear_color=Color(0.0392157, 0.0431373, 0.0588235, 1)

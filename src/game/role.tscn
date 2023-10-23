@@ -1,0 +1,121 @@
+[gd_scene load_steps=7 format=3 uid="uid://b2i5gne35ocmu"]
+
+[sub_resource type="GDScript" id="GDScript_u3xrs"]
+script/source = "extends VBoxContainer
+
+
+func _ready() -> void:
+	if GameState.my_state.is_infected:
+		$Healthy.queue_free()
+		$Designated.queue_free()
+		$HealthyJob.queue_free()
+		$DesignatedJob.queue_free()
+		
+		for state in GameState.peers.values():
+			if state.name == GameState.my_state.name or not state.is_infected:
+				continue
+			var label := Label.new()
+			label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			label.text = state.name
+			$Infected.add_child(label)
+	else:
+		$Infected.queue_free()
+		$InfectedJob.queue_free()
+		if GameState.my_state.is_designated_survivor:
+			$HealthyJob.queue_free()
+		else:
+			$Designated.queue_free()
+			$DesignatedJob.queue_free()
+	
+	await get_tree().create_timer(GameState.ROLE_TIME).timeout
+	Main.fade_change_scene(preload(\"res://src/game/bedroom/bedroom.tscn\").instantiate())
+"
+
+[sub_resource type="LabelSettings" id="LabelSettings_m4hpe"]
+font_size = 28
+
+[sub_resource type="LabelSettings" id="LabelSettings_hogoj"]
+font_size = 48
+
+[sub_resource type="LabelSettings" id="LabelSettings_ds1f2"]
+font_size = 28
+
+[sub_resource type="LabelSettings" id="LabelSettings_5ua0q"]
+font_size = 28
+
+[sub_resource type="LabelSettings" id="LabelSettings_x5bqp"]
+font_size = 48
+
+[node name="Role" type="VBoxContainer"]
+custom_minimum_size = Vector2(400, 0)
+anchors_preset = 13
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -148.5
+offset_right = 148.5
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+script = SubResource("GDScript_u3xrs")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 2
+text = "You are"
+label_settings = SubResource("LabelSettings_m4hpe")
+horizontal_alignment = 1
+
+[node name="Healthy" type="Label" parent="."]
+layout_mode = 2
+text = "HEALTHY"
+label_settings = SubResource("LabelSettings_hogoj")
+horizontal_alignment = 1
+
+[node name="Infected" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Infected"]
+layout_mode = 2
+text = "INFECTED"
+label_settings = SubResource("LabelSettings_hogoj")
+horizontal_alignment = 1
+
+[node name="Label2" type="Label" parent="Infected"]
+layout_mode = 2
+text = "with"
+label_settings = SubResource("LabelSettings_ds1f2")
+horizontal_alignment = 1
+
+[node name="Designated" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Designated"]
+layout_mode = 2
+text = "and the"
+label_settings = SubResource("LabelSettings_5ua0q")
+horizontal_alignment = 1
+
+[node name="Label2" type="Label" parent="Designated"]
+layout_mode = 2
+text = "DESIGNATED
+SURVIVOR"
+label_settings = SubResource("LabelSettings_x5bqp")
+horizontal_alignment = 1
+
+[node name="HealthyJob" type="Label" parent="."]
+layout_mode = 2
+text = "Fix the Oxygen Recycler, or escape with your crewmates.
+Stay alive!"
+autowrap_mode = 3
+
+[node name="InfectedJob" type="Label" parent="."]
+layout_mode = 2
+text = "Stop the Healthy from fixing the Oxygen Recycler, and escape successfully.
+Sleep twice to be able to kill those that get in your way."
+autowrap_mode = 3
+
+[node name="DesignatedJob" type="Label" parent="."]
+layout_mode = 2
+text = "Fix the Oxygen Recycler, or use the escape code that you are given to escape.
+Be careful who you share this code with, the Infected want to escape too."
+autowrap_mode = 3

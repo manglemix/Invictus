@@ -1,0 +1,26 @@
+[remap]
+
+importer="2d_array_texture"
+type="CompressedTexture2DArray"
+uid="uid://c2u8pp454siq7"
+path="res://.godot/imported/bedroom.exr-914eb67d3bbc5666a974eb716cf6f9f6.ctexarray"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://src/game/bedroom/bedroom.exr"
+dest_files=["res://.godot/imported/bedroom.exr-914eb67d3bbc5666a974eb716cf6f9f6.ctexarray"]
+
+[params]
+
+compress/mode=3
+compress/high_quality=false
+compress/lossy_quality=0.7
+compress/hdr_compression=1
+compress/channel_pack=1
+mipmaps/generate=false
+mipmaps/limit=-1
+slices/horizontal=1
+slices/vertical=4

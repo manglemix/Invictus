@@ -1,0 +1,138 @@
+[gd_scene load_steps=6 format=3 uid="uid://0ah7yqqa4ae6"]
+
+[ext_resource type="Script" path="res://src/pregame/lobby.gd" id="1_drpv0"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_8mi6o"]
+font_size = 80
+
+[sub_resource type="LabelSettings" id="LabelSettings_fdt6d"]
+font_color = Color(0.741176, 0.117647, 0.117647, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_yam4g"]
+font_color = Color(0.14902, 0.870588, 0.423529, 1)
+
+[sub_resource type="GDScript" id="GDScript_0683e"]
+script/source = "extends Button
+
+
+func _on_pressed() -> void:
+	multiplayer.multiplayer_peer.close()
+	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
+	Main.fade_change_scene(preload(\"res://src/pregame/main_menu.tscn\").instantiate())
+"
+
+[node name="Lobby" type="ScrollContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 80.0
+offset_right = -80.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_drpv0")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+custom_minimum_size = Vector2(400, 0)
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 3
+alignment = 1
+
+[node name="Label" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "Lobby"
+label_settings = SubResource("LabelSettings_8mi6o")
+horizontal_alignment = 1
+
+[node name="PlayerStuff" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/PlayerStuff"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="VBoxContainer/PlayerStuff/HBoxContainer"]
+layout_mode = 2
+text = "Your name is: "
+
+[node name="PlayerName" type="LineEdit" parent="VBoxContainer/PlayerStuff/HBoxContainer"]
+layout_mode = 2
+max_length = 12
+expand_to_text_length = true
+
+[node name="Label2" type="Label" parent="VBoxContainer/PlayerStuff"]
+layout_mode = 2
+text = "Your crewmates are:"
+horizontal_alignment = 1
+
+[node name="Players" type="VBoxContainer" parent="VBoxContainer/PlayerStuff"]
+layout_mode = 2
+alignment = 1
+
+[node name="PlayerInfo" type="Label" parent="VBoxContainer/PlayerStuff"]
+layout_mode = 2
+text = "You must wait for the host to start the game
+Here are some tips:
+1. Be careful who you share information with
+2. Don't always trust the loudest person
+3. Focus on the facts
+4. Complacency is killer"
+autowrap_mode = 3
+
+[node name="HostStuff" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="Label3" type="Label" parent="VBoxContainer/HostStuff"]
+layout_mode = 2
+text = "You are the host. You are not a player in the game."
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer/HostStuff"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/HostStuff/HBoxContainer2"]
+layout_mode = 2
+text = "Room Code: "
+
+[node name="Room Code" type="LineEdit" parent="VBoxContainer/HostStuff/HBoxContainer2"]
+layout_mode = 2
+theme_override_colors/font_uneditable_color = Color(1, 1, 1, 1)
+text = "000000"
+editable = false
+flat = true
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/HostStuff"]
+layout_mode = 2
+
+[node name="NotEnough" type="Label" parent="VBoxContainer/HostStuff/HBoxContainer"]
+layout_mode = 2
+text = "You need at least 6 players to play"
+label_settings = SubResource("LabelSettings_fdt6d")
+
+[node name="Ready" type="Label" parent="VBoxContainer/HostStuff/HBoxContainer"]
+layout_mode = 2
+text = "Ready"
+label_settings = SubResource("LabelSettings_yam4g")
+
+[node name="Start" type="Button" parent="VBoxContainer/HostStuff/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+disabled = true
+text = "START"
+
+[node name="Label2" type="Label" parent="VBoxContainer/HostStuff"]
+layout_mode = 2
+text = "Players:"
+
+[node name="Players" type="VBoxContainer" parent="VBoxContainer/HostStuff"]
+layout_mode = 2
+
+[node name="Exit" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+text = "Exit"
+script = SubResource("GDScript_0683e")
+
+[connection signal="focus_exited" from="VBoxContainer/PlayerStuff/HBoxContainer/PlayerName" to="." method="_on_player_name_changed"]
+[connection signal="text_submitted" from="VBoxContainer/PlayerStuff/HBoxContainer/PlayerName" to="." method="_on_player_name_changed"]
+[connection signal="pressed" from="VBoxContainer/HostStuff/HBoxContainer/Start" to="." method="_on_host_start_pressed"]
+[connection signal="pressed" from="VBoxContainer/Exit" to="VBoxContainer/Exit" method="_on_pressed"]

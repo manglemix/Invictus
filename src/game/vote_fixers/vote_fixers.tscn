@@ -1,0 +1,107 @@
+[gd_scene load_steps=4 format=3 uid="uid://dywrbgcj6ldv1"]
+
+[sub_resource type="GDScript" id="GDScript_c6qr3"]
+script/source = "extends ScrollContainer
+
+
+func _ready() -> void:
+	update_top_voters()
+	GameState.player_vote_changed.connect(update_top_voters)
+	for state in GameState.peers.values():
+		if state.name == GameState.my_state.name:
+			continue
+		var your_vote: YourVoteEntry = preload(\"res://src/game/vote_fixers/your_vote_entry.tscn\").instantiate()
+		your_vote.player_name = state.name
+		$VBoxContainer/YourVotes.add_child(your_vote)
+
+
+func update_top_voters(_unused=null):
+	var current_team: VBoxContainer = $VBoxContainer/CurrentTeam
+	for child in current_team.get_children():
+		child.queue_free()
+	for state in GameState.get_top_voted():
+		var entry: TopVotedEntry = preload(\"res://src/game/vote_fixers/top_voted_entry.tscn\").instantiate()
+		entry.state = state
+		current_team.add_child(entry)
+
+
+func _process(_delta: float) -> void:
+	if GameState.timer <= 0.0:
+		set_process(false)
+		var label: Label = $VBoxContainer/Label
+		label.set_process(false)
+		var tween := label.create_tween()
+		tween.tween_property(label, \"modulate:a\", 0.0, 1.0)
+		
+		var your_votes: VBoxContainer = $VBoxContainer/YourVotes
+		var tween2 := your_votes.create_tween()
+		tween2.tween_property(your_votes, \"modulate:a\", 0.0, 1.0)
+"
+
+[sub_resource type="LabelSettings" id="LabelSettings_7omel"]
+font_size = 24
+
+[sub_resource type="GDScript" id="GDScript_y7w0g"]
+script/source = "extends Label
+
+
+func _process(_delta: float) -> void:
+	text = \"%s seconds left\" % roundi(GameState.timer)
+	if GameState.timer <= 10.0:
+		modulate = Color.RED
+	else:
+		modulate = Color.WHITE
+"
+
+[node name="VoteFilters" type="ScrollContainer"]
+custom_minimum_size = Vector2(450, 0)
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = SubResource("GDScript_c6qr3")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+custom_minimum_size = Vector2(450, 0)
+layout_mode = 2
+
+[node name="Control" type="Control" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 2
+
+[node name="RichTextLabel" type="RichTextLabel" parent="VBoxContainer"]
+layout_mode = 2
+bbcode_enabled = true
+text = "[center][font_size=32]Vote for 3 people to fix the [b]Oxygen Recycler[/b]
+[/font_size][/center]"
+fit_content = true
+scroll_active = false
+
+[node name="Label" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "90 seconds left"
+label_settings = SubResource("LabelSettings_7omel")
+horizontal_alignment = 1
+script = SubResource("GDScript_y7w0g")
+
+[node name="RichTextLabel2" type="RichTextLabel" parent="VBoxContainer"]
+layout_mode = 2
+bbcode_enabled = true
+text = "[font_size=20]Current Team
+[/font_size]"
+fit_content = true
+
+[node name="CurrentTeam" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="YourVotes" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="RichTextLabel3" type="RichTextLabel" parent="VBoxContainer/YourVotes"]
+layout_mode = 2
+bbcode_enabled = true
+text = "[font_size=20]Your Votes
+[/font_size]"
+fit_content = true

@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://3rr3sgnqu80g"]
+
+[ext_resource type="Script" path="res://src/transitions/screen_fade/screen_fade.gd" id="1_bx1js"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ldd5o"]
+bg_color = Color(0.0392157, 0.0431373, 0.0588235, 1)
+
+[node name="Panel" type="Panel"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_ldd5o")
+script = ExtResource("1_bx1js")

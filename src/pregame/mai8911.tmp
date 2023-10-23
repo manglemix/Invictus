@@ -1,0 +1,54 @@
+[gd_scene load_steps=4 format=3 uid="uid://c2vvgghn56003"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_gtroe"]
+font_size = 80
+
+[sub_resource type="GDScript" id="GDScript_eexkv"]
+script/source = "extends Button
+
+
+func _on_pressed() -> void:
+	Main.fade_change_scene(preload(\"res://src/pregame/join_game.tscn\").instantiate())
+"
+
+[sub_resource type="GDScript" id="GDScript_vbfny"]
+script/source = "extends Button
+
+
+func _on_pressed() -> void:
+	Main.fade_change_scene(preload(\"res://ho.tscn\").instantiate())
+"
+
+[node name="MainMenu" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 2
+text = "Invictus"
+label_settings = SubResource("LabelSettings_gtroe")
+horizontal_alignment = 1
+
+[node name="Join" type="Button" parent="."]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 30
+text = "JOIN"
+script = SubResource("GDScript_eexkv")
+
+[node name="Host" type="Button" parent="."]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 30
+text = "HOST"
+script = SubResource("GDScript_vbfny")
+
+[connection signal="pressed" from="Join" to="Join" method="_on_pressed"]
+[connection signal="pressed" from="Host" to="Host" method="_on_pressed"]

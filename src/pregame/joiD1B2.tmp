@@ -1,0 +1,161 @@
+[gd_scene load_steps=6 format=3 uid="uid://bdgbrpmbht7h6"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_5lmev"]
+font_size = 80
+
+[sub_resource type="GDScript" id="GDScript_p31xi"]
+script/source = "extends Button
+
+
+var ws: WebSocketPeer
+
+@onready var room_code_edit: LineEdit = $\"../RoomCode\"
+
+
+func _on_pressed() -> void:
+	if room_code_edit.text.length() != 6:
+		return
+	if !room_code_edit.text.is_valid_int():
+		push_error(\"Room Code is not an int\")
+		room_code_edit.text = \"\"
+		return
+	
+	text = \"CONNECTING\"
+	disabled = true
+	var room_code := room_code_edit.text
+	ws = WebSocketPeer.new()
+	ws.connect_to_url(\"wss://webrtc.manglemix.com/join\")
+	while ws.get_ready_state() == WebSocketPeer.STATE_CONNECTING:
+		await get_tree().create_timer(0.2).timeout
+	if ws.get_ready_state() != WebSocketPeer.STATE_OPEN:
+		reset()
+		return
+	ws.send_text(room_code)
+	
+	var client_id_str := await ws_recv()
+	if client_id_str.is_empty():
+		return
+	var client_id := int(client_id_str)
+	var multiplayer_peer := WebRTCMultiplayerPeer.new()
+	multiplayer_peer.create_client(client_id)
+	multiplayer.multiplayer_peer = multiplayer_peer
+	multiplayer.connected_to_server.connect(
+		func():
+			Main.fade_change_scene(preload(\"res://lo.tscn\").instantiate())
+	)
+	
+	var peer := WebRTCPeerConnection.new()
+	peer.session_description_created.connect(peer.set_local_description)
+	multiplayer_peer.add_peer(peer, 1)
+	peer.session_description_created.connect(
+		func(_type: String, sdp: String):
+			ws.send_text(sdp)
+			peer.set_remote_description(\"answer\", await ws_recv())
+			while true:
+				var ice: Dictionary = JSON.parse_string(await ws_recv())
+				peer.add_ice_candidate(ice[\"media\"], ice[\"index\"], ice[\"name\"])
+	)
+	peer.create_offer()
+
+
+func ws_recv() -> String:
+	while true:
+		await get_tree().create_timer(0.2).timeout
+		if ws.get_ready_state() > WebSocketPeer.STATE_OPEN:
+			reset()
+			return \"\"
+		if ws.get_available_packet_count() > 0:
+			return ws.get_packet().get_string_from_utf8()
+	return \"\"
+
+
+func _process(_delta: float) -> void:
+	if ws != null:
+		ws.poll()
+
+
+func reset():
+	text = \"JOIN\"
+	disabled = false
+	multiplayer.multiplayer_peer.close()
+	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
+
+
+func _on_room_code_text_changed(new_text: String) -> void:
+	if !new_text.is_valid_int():
+		room_code_edit.delete_char_at_caret()
+"
+
+[sub_resource type="InputEventAction" id="InputEventAction_3tgdg"]
+action = &"ui_cancel"
+
+[sub_resource type="Shortcut" id="Shortcut_42swu"]
+events = [SubResource("InputEventAction_3tgdg")]
+
+[sub_resource type="GDScript" id="GDScript_gyl4c"]
+script/source = "extends Button
+
+
+func _on_pressed() -> void:
+	Main.fade_change_scene(preload(\"res://main_menu.tscn\").instantiate())
+"
+
+[node name="JoinGame" type="VBoxContainer"]
+custom_minimum_size = Vector2(400, 0)
+anchors_preset = 13
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -139.0
+offset_right = 139.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 2
+text = "Join"
+label_settings = SubResource("LabelSettings_5lmev")
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+alignment = 1
+
+[node name="RoomCode" type="LineEdit" parent="HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+placeholder_text = "Room Code"
+max_length = 6
+expand_to_text_length = true
+virtual_keyboard_type = 2
+
+[node name="Join" type="Button" parent="HBoxContainer"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 30
+text = "JOIN"
+script = SubResource("GDScript_p31xi")
+
+[node name="Back" type="Button" parent="."]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 30
+shortcut = SubResource("Shortcut_42swu")
+text = "BACK"
+script = SubResource("GDScript_gyl4c")
+
+[node name="Control" type="Control" parent="."]
+custom_minimum_size = Vector2(0, 27.395)
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="."]
+layout_mode = 2
+text = "The Room Code is a 6 digit number that the host will give you. Keep it private as anyone with the room code will be able to join"
+autowrap_mode = 3
+
+[connection signal="text_changed" from="HBoxContainer/RoomCode" to="HBoxContainer/Join" method="_on_room_code_text_changed"]
+[connection signal="pressed" from="HBoxContainer/Join" to="HBoxContainer/Join" method="_on_pressed"]
+[connection signal="pressed" from="Back" to="Back" method="_on_pressed"]
