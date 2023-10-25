@@ -1,0 +1,478 @@
+[gd_scene load_steps=14 format=3 uid="uid://btav00c2amsfq"]
+
+[ext_resource type="PackedScene" uid="uid://cp7mxqmfm15lx" path="res://src/game/free_roam_map/free_roam_map.blend" id="1_boeh5"]
+[ext_resource type="Script" path="res://src/game/round_timer.gd" id="1_wbt6l"]
+
+[sub_resource type="GDScript" id="GDScript_ac1tc"]
+script/source = "extends ScrollContainer
+
+
+func _ready() -> void:
+	if GameState.my_state.is_fixer:
+		$VBoxContainer/InfectedNonFixer.queue_free()
+		$VBoxContainer/NonInfectedNonFixer.queue_free()
+		if GameState.my_state.is_infected:
+			$VBoxContainer/NonInfectedFixer.queue_free()
+		else:
+			$VBoxContainer/InfectedFixer.queue_free()
+	else:
+		$VBoxContainer/NonInfectedFixer.queue_free()
+		$VBoxContainer/InfectedFixer.queue_free()
+		if GameState.my_state.is_infected:
+			$VBoxContainer/NonInfectedNonFixer.queue_free()
+		else:
+			$VBoxContainer/InfectedNonFixer.queue_free()
+"
+
+[sub_resource type="LabelSettings" id="LabelSettings_0tnkd"]
+font_size = 32
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_vmjor"]
+size = Vector3(6.93868, 1, 4.46375)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_iynwv"]
+size = Vector3(11.3843, 1, 5.96411)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ixq8p"]
+size = Vector3(6.93868, 1, 4.6446)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_21jcy"]
+size = Vector3(4, 1, 4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_41lqt"]
+size = Vector3(4, 1, 4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_iiflv"]
+size = Vector3(4, 1, 4)
+
+[sub_resource type="LabelSettings" id="LabelSettings_dcxxm"]
+font_size = 25
+outline_size = 4
+outline_color = Color(0.0901961, 0.0901961, 0.0901961, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_obfhy"]
+font_size = 17
+outline_size = 4
+outline_color = Color(0.0901961, 0.0901961, 0.0901961, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_68wn3"]
+line_spacing = 0.0
+font_size = 14
+outline_size = 4
+outline_color = Color(0.0901961, 0.0901961, 0.0901961, 1)
+
+[node name="FreeRoamMap" type="ScrollContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+scroll_vertical = 353
+script = SubResource("GDScript_ac1tc")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+custom_minimum_size = Vector2(450, 0)
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 3
+
+[node name="Control" type="Control" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 15)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "Habitat"
+label_settings = SubResource("LabelSettings_0tnkd")
+horizontal_alignment = 1
+
+[node name="NonInfectedNonFixer" type="RichTextLabel" parent="VBoxContainer"]
+layout_mode = 2
+bbcode_enabled = true
+text = "[font_size=18]You have no responsibilities right now. You do have a need that you have to satisfy. If you are about to run out of time to do it, you will do it automatically.
+[/font_size]"
+fit_content = true
+
+[node name="InfectedNonFixer" type="RichTextLabel" parent="VBoxContainer"]
+layout_mode = 2
+bbcode_enabled = true
+text = "[font_size=18]You need to figure out what the escape codes are, or figure out a way to frame your crewmates. You do have a need that you have to satisfy. If you are about to run out of time to do it, you will do it automatically.
+[/font_size]"
+fit_content = true
+
+[node name="NonInfectedFixer" type="RichTextLabel" parent="VBoxContainer"]
+layout_mode = 2
+bbcode_enabled = true
+text = "[font_size=18]You [i]must[/i] go to the [b]Oxygen Recycler[/b] and fix it since you were voted for. If you fail to do so, you will have to explain yourself to your crewmates.
+[/font_size]"
+fit_content = true
+
+[node name="InfectedFixer" type="RichTextLabel" parent="VBoxContainer"]
+layout_mode = 2
+bbcode_enabled = true
+text = "[font_size=18]You [i]could[/i] go to the [b]Oxygen Recycler[/b] and fix it since you were voted for, but you don't want to. If you want to seem inconspicuous, pretend to fix it or blame someone else for not doing their job.
+[/font_size]"
+fit_content = true
+
+[node name="RoundTimer" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+horizontal_alignment = 1
+script = ExtResource("1_wbt6l")
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 450)
+layout_mode = 2
+size_flags_vertical = 3
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="VBoxContainer/SubViewportContainer"]
+transparent_bg = true
+handle_input_locally = false
+size = Vector2i(450, 450)
+render_target_update_mode = 4
+
+[node name="free_roam_map" parent="VBoxContainer/SubViewportContainer/SubViewport" instance=ExtResource("1_boeh5")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.535, 0, 0)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="VBoxContainer/SubViewportContainer/SubViewport"]
+transform = Transform3D(1, 0, 0, 0, -0.707107, 0.707107, 0, -0.707107, -0.707107, 0, 7.57668, 0)
+light_energy = 0.96
+sky_mode = 1
+
+[node name="Camera3D" type="Camera3D" parent="VBoxContainer/SubViewportContainer/SubViewport"]
+transform = Transform3D(-1, -7.19609e-08, 4.96425e-08, 0, 0.567844, 0.823136, -8.74228e-08, 0.823136, -0.567844, 0, 17.616, 0)
+projection = 1
+size = 24.915
+
+[node name="Kitchen" type="Area3D" parent="VBoxContainer/SubViewportContainer/SubViewport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.18867, 0.503573, 9.96666)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="VBoxContainer/SubViewportContainer/SubViewport/Kitchen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.574526, 0, -0.171847)
+shape = SubResource("BoxShape3D_vmjor")
+
+[node name="CommonArea" type="Area3D" parent="VBoxContainer/SubViewportContainer/SubViewport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.918065, 0.503573, 3.71198)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="VBoxContainer/SubViewportContainer/SubViewport/CommonArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.960495, 0, -0.76688)
+shape = SubResource("BoxShape3D_iynwv")
+
+[node name="Gym" type="Area3D" parent="VBoxContainer/SubViewportContainer/SubViewport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.18867, 0.503573, 14.6166)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="VBoxContainer/SubViewportContainer/SubViewport/Gym"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.574526, 0, -0.161232)
+shape = SubResource("BoxShape3D_ixq8p")
+
+[node name="Bedroom1" type="Area3D" parent="VBoxContainer/SubViewportContainer/SubViewport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.0871, 0.503574, 9.60714)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="VBoxContainer/SubViewportContainer/SubViewport/Bedroom1"]
+shape = SubResource("BoxShape3D_21jcy")
+
+[node name="Bathroom1" type="Area3D" parent="VBoxContainer/SubViewportContainer/SubViewport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.0871, 0.503574, 5.49752)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="VBoxContainer/SubViewportContainer/SubViewport/Bathroom1"]
+shape = SubResource("BoxShape3D_41lqt")
+
+[node name="Bedroom2" type="Area3D" parent="VBoxContainer/SubViewportContainer/SubViewport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.0871, 0.503574, 13.6462)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="VBoxContainer/SubViewportContainer/SubViewport/Bedroom2"]
+shape = SubResource("BoxShape3D_21jcy")
+
+[node name="Bedroom3" type="Area3D" parent="VBoxContainer/SubViewportContainer/SubViewport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.0871, 0.503574, 17.6306)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="VBoxContainer/SubViewportContainer/SubViewport/Bedroom3"]
+shape = SubResource("BoxShape3D_21jcy")
+
+[node name="Bedroom4" type="Area3D" parent="VBoxContainer/SubViewportContainer/SubViewport"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 6.00038, 0.503574, 21.6867)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="VBoxContainer/SubViewportContainer/SubViewport/Bedroom4"]
+shape = SubResource("BoxShape3D_21jcy")
+
+[node name="Bedroom5" type="Area3D" parent="VBoxContainer/SubViewportContainer/SubViewport"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 1.96128, 0.503574, 21.6867)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="VBoxContainer/SubViewportContainer/SubViewport/Bedroom5"]
+shape = SubResource("BoxShape3D_21jcy")
+
+[node name="Bedroom6" type="Area3D" parent="VBoxContainer/SubViewportContainer/SubViewport"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -2.02305, 0.503574, 21.6867)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="VBoxContainer/SubViewportContainer/SubViewport/Bedroom6"]
+shape = SubResource("BoxShape3D_21jcy")
+
+[node name="Bedroom7" type="Area3D" parent="VBoxContainer/SubViewportContainer/SubViewport"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -6.00835, 0.503574, 21.6867)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="VBoxContainer/SubViewportContainer/SubViewport/Bedroom7"]
+shape = SubResource("BoxShape3D_21jcy")
+
+[node name="Bedroom8" type="Area3D" parent="VBoxContainer/SubViewportContainer/SubViewport"]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, -10.1208, 0.503574, 17.6355)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="VBoxContainer/SubViewportContainer/SubViewport/Bedroom8"]
+shape = SubResource("BoxShape3D_21jcy")
+
+[node name="Bedroom9" type="Area3D" parent="VBoxContainer/SubViewportContainer/SubViewport"]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, -10.1208, 0.503574, 13.6511)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="VBoxContainer/SubViewportContainer/SubViewport/Bedroom9"]
+shape = SubResource("BoxShape3D_21jcy")
+
+[node name="Bedroom10" type="Area3D" parent="VBoxContainer/SubViewportContainer/SubViewport"]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, -10.1208, 0.503574, 9.66584)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="VBoxContainer/SubViewportContainer/SubViewport/Bedroom10"]
+shape = SubResource("BoxShape3D_21jcy")
+
+[node name="Bathroom2" type="Area3D" parent="VBoxContainer/SubViewportContainer/SubViewport"]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, -10.121, 0.503573, 5.498)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="VBoxContainer/SubViewportContainer/SubViewport/Bathroom2"]
+shape = SubResource("BoxShape3D_iiflv")
+
+[node name="MapLabels" type="Control" parent="VBoxContainer/SubViewportContainer/SubViewport"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/SubViewportContainer/SubViewport/MapLabels"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -35.5
+offset_top = -52.0
+offset_right = 35.5
+offset_bottom = -64.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "Common
+Area"
+label_settings = SubResource("LabelSettings_dcxxm")
+horizontal_alignment = 1
+
+[node name="Label2" type="Label" parent="VBoxContainer/SubViewportContainer/SubViewport/MapLabels"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -45.5
+offset_top = 36.0
+offset_right = 110.0
+offset_bottom = 19.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Kitchen"
+label_settings = SubResource("LabelSettings_dcxxm")
+horizontal_alignment = 1
+
+[node name="Label3" type="Label" parent="VBoxContainer/SubViewportContainer/SubViewport/MapLabels"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -45.5
+offset_top = 36.0
+offset_right = 110.0
+offset_bottom = -121.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Gym
+"
+label_settings = SubResource("LabelSettings_dcxxm")
+horizontal_alignment = 1
+
+[node name="Label6" type="Label" parent="VBoxContainer/SubViewportContainer/SubViewport/MapLabels"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.36
+anchor_top = 0.493
+anchor_right = 0.36
+anchor_bottom = 0.493
+offset_left = -77.75
+offset_top = -19.0
+offset_right = 77.75
+offset_bottom = 19.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "???"
+label_settings = SubResource("LabelSettings_dcxxm")
+horizontal_alignment = 1
+
+[node name="Label4" type="Label" parent="VBoxContainer/SubViewportContainer/SubViewport/MapLabels"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.757
+anchor_bottom = 0.757
+offset_top = -38.0
+offset_right = 95.0
+grow_vertical = 0
+text = "Bathroom"
+label_settings = SubResource("LabelSettings_obfhy")
+horizontal_alignment = 1
+
+[node name="Label5" type="Label" parent="VBoxContainer/SubViewportContainer/SubViewport/MapLabels"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.79
+anchor_top = 0.757
+anchor_right = 0.79
+anchor_bottom = 0.757
+offset_top = -38.0
+offset_right = 95.0
+grow_vertical = 0
+text = "Bathroom"
+label_settings = SubResource("LabelSettings_obfhy")
+horizontal_alignment = 1
+
+[node name="Bedroom1" type="Label" parent="VBoxContainer/SubViewportContainer/SubViewport/MapLabels"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.622
+anchor_bottom = 0.642
+offset_top = -38.0
+offset_right = 95.0
+grow_vertical = 0
+text = "Bedroom1"
+label_settings = SubResource("LabelSettings_68wn3")
+horizontal_alignment = 1
+
+[node name="Bedroom2" type="Label" parent="VBoxContainer/SubViewportContainer/SubViewport/MapLabels"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.492
+anchor_bottom = 0.492
+offset_top = -38.0
+offset_right = 95.0
+grow_vertical = 0
+text = "Bedroom2"
+label_settings = SubResource("LabelSettings_68wn3")
+horizontal_alignment = 1
+
+[node name="Bedroom3" type="Label" parent="VBoxContainer/SubViewportContainer/SubViewport/MapLabels"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.36
+anchor_bottom = 0.36
+offset_top = -38.0
+offset_right = 95.0
+grow_vertical = 0
+text = "Bedroom3"
+label_settings = SubResource("LabelSettings_68wn3")
+horizontal_alignment = 1
+
+[node name="Bedroom4" type="Label" parent="VBoxContainer/SubViewportContainer/SubViewport/MapLabels"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.155
+anchor_top = 0.218
+anchor_right = 0.155
+anchor_bottom = 0.218
+offset_top = -38.0
+offset_right = 95.0
+grow_vertical = 0
+text = "Bedroom4"
+label_settings = SubResource("LabelSettings_68wn3")
+horizontal_alignment = 1
+
+[node name="Bedroom5" type="Label" parent="VBoxContainer/SubViewportContainer/SubViewport/MapLabels"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.317
+anchor_top = 0.218
+anchor_right = 0.317
+anchor_bottom = 0.218
+offset_top = -38.0
+offset_right = 95.0
+grow_vertical = 0
+text = "Bedroom5"
+label_settings = SubResource("LabelSettings_68wn3")
+horizontal_alignment = 1
+
+[node name="Bedroom6" type="Label" parent="VBoxContainer/SubViewportContainer/SubViewport/MapLabels"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.479
+anchor_top = 0.218
+anchor_right = 0.479
+anchor_bottom = 0.218
+offset_top = -38.0
+offset_right = 95.0
+grow_vertical = 0
+text = "Bedroom6"
+label_settings = SubResource("LabelSettings_68wn3")
+horizontal_alignment = 1
+
+[node name="Bedroom7" type="Label" parent="VBoxContainer/SubViewportContainer/SubViewport/MapLabels"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.639
+anchor_top = 0.218
+anchor_right = 0.639
+anchor_bottom = 0.218
+offset_top = -38.0
+offset_right = 95.0
+grow_vertical = 0
+text = "Bedroom7"
+label_settings = SubResource("LabelSettings_68wn3")
+horizontal_alignment = 1
+
+[node name="Bedroom8" type="Label" parent="VBoxContainer/SubViewportContainer/SubViewport/MapLabels"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.8
+anchor_top = 0.36
+anchor_right = 0.8
+anchor_bottom = 0.36
+offset_top = -38.0
+offset_right = 95.0
+grow_vertical = 0
+text = "Bedroom8
+"
+label_settings = SubResource("LabelSettings_68wn3")
+horizontal_alignment = 1
+
+[node name="Bedroom9" type="Label" parent="VBoxContainer/SubViewportContainer/SubViewport/MapLabels"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.8
+anchor_top = 0.488
+anchor_right = 0.8
+anchor_bottom = 0.488
+offset_top = -38.0
+offset_right = 95.0
+grow_vertical = 0
+text = "Bedroom9"
+label_settings = SubResource("LabelSettings_68wn3")
+horizontal_alignment = 1
+
+[node name="Bedroom10" type="Label" parent="VBoxContainer/SubViewportContainer/SubViewport/MapLabels"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.8
+anchor_top = 0.623
+anchor_right = 0.8
+anchor_bottom = 0.623
+offset_top = -38.0
+offset_right = 95.0
+grow_vertical = 0
+text = "Bedroom10
+"
+label_settings = SubResource("LabelSettings_68wn3")
+horizontal_alignment = 1

@@ -11,6 +11,7 @@ var name: StringName:
 var multiplayer_id: int
 var is_infected: bool
 var is_designated_survivor: bool
+var is_fixer: bool
 
 var bed_rotation: float
 var bed_origin: Vector2

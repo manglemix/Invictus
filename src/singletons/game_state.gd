@@ -4,8 +4,15 @@ extends Node
 const SECRET_PATH := "user://secret_key"
 const GOOD_TO_BAD_COUNT := 3.0
 const VOTE_TIME := 90.0
-const ROLE_TIME := 2.5
+const ROLE_TIME := 5.0
+const VOTE_REVEAL_TIME := 3.0
+const FREE_ROAM_TIME := 45.0
+const ROUNDS := 5
+const SLEEP_TIME := 5.0
+const NIGHT_INFO_TIME := 7.0
+const TIMER_SYNC_DELAY := 0.2
 
+signal timer_finished
 signal new_player_added(state: PlayerState)
 signal player_vote_changed(state: PlayerState)
 signal player_removed(name: StringName)
@@ -17,13 +24,16 @@ var peers := {}
 # multiplayer_id to player name map
 var peer_ids := {}
 var timer := 0.0
-var votes := {}
+var timer_running := false
+var is_noon := false
 
 # Client
 signal game_has_started
 signal player_state_received
 var my_secret: int
 var my_state: PlayerState
+var ping_start_time: int
+var timer_sync_timer: float
 
 # Server
 #signal player_connected(player_secret: int)
@@ -38,8 +48,14 @@ func _ready() -> void:
 
 
 func _on_peer_disconnected(peer_id: int):
-	if peer_id in peer_ids:
-		player_removed.emit(peer_ids[peer_id])
+	if not peer_id in peer_ids:
+		return
+	player_removed.emit(peer_ids[peer_id])
+	if !is_game_started:
+		@warning_ignore("shadowed_variable_base_class")
+		var name: StringName = peer_ids[peer_id]
+		peer_ids.erase(peer_id)
+		peers.erase(name)
 
 
 func _on_peer_connected(peer_id: int):
@@ -49,10 +65,18 @@ func _on_peer_connected(peer_id: int):
 
 @rpc("any_peer", "reliable", "call_remote")
 func identify_peer(secret: int):
+	if !multiplayer.is_server():
+		push_error("Attempted to start game on %s" % multiplayer.get_unique_id())
+		return
+		
 	var state: PlayerState
 	
 	if secret in peer_names:
 		state = peers[peer_names[secret]]
+	
+	elif is_game_started:
+		multiplayer.multiplayer_peer.disconnect_peer(multiplayer.get_remote_sender_id())
+		return
 		
 	else:
 		state = PlayerState.new()
@@ -76,6 +100,8 @@ func identify_peer(secret: int):
 @warning_ignore("shadowed_variable")
 func pre_init_peer(is_game_started: bool):
 	self.is_game_started = is_game_started
+	peer_ids.clear()
+	peers.clear()
 	if is_game_started:
 		var file := FileAccess.open(SECRET_PATH, FileAccess.WRITE)
 		if file == null:
@@ -149,9 +175,8 @@ func start_game():
 	if !multiplayer.is_server():
 		push_error("Attempted to start game on %s" % multiplayer.get_unique_id())
 		return
+	peer_names.clear()
 	is_game_started = true
-	timer = VOTE_TIME + ROLE_TIME
-	init_votes()
 	var bad_count := roundi(peers.size() / GOOD_TO_BAD_COUNT)
 	var infected_names: Array[StringName] = []
 	var peer_states := peers.values()
@@ -172,6 +197,7 @@ func start_game():
 		designated_survivor = state.name
 		break
 	host_started_game.rpc(infected_names, designated_survivor)
+	game_loop()
 
 
 @rpc("authority", "call_remote", "reliable")
@@ -181,8 +207,41 @@ func host_started_game(infected_names: Array, designated_survivor: StringName):
 		peers[name].is_infected = true
 	peers[designated_survivor].is_designated_survivor = true
 	game_has_started.emit()
-	timer = VOTE_TIME + ROLE_TIME
-	init_votes()
+	game_loop()
+
+
+func game_loop():
+	for _i in range(ROUNDS):
+		# Morning Vote
+		is_noon = false
+		timer = VOTE_TIME + ROLE_TIME
+		init_votes()
+		await timer_finished
+		
+		# Morning Free Roam
+		timer = VOTE_REVEAL_TIME + FREE_ROAM_TIME
+		for state in get_top_voted():
+			state.is_fixer = true
+		await timer_finished
+		
+		# Noon Vote
+		is_noon = true
+		timer = VOTE_TIME + ROLE_TIME
+		init_votes()
+		await timer_finished
+		
+		# Noon Free Roam
+		timer = VOTE_REVEAL_TIME + FREE_ROAM_TIME
+		for state in get_top_voted():
+			state.is_fixer = true
+		await timer_finished
+		
+		# Night
+		timer = SLEEP_TIME
+		await timer_finished
+		# Reveal what happened at night
+		timer = NIGHT_INFO_TIME
+		await timer_finished
 
 
 func vote_for(player_name: StringName):
@@ -220,9 +279,35 @@ func get_top_voted() -> Array:
 
 func init_votes():
 	for state in peers.values():
+		state.is_fixer = false
 		state.votes.clear()
 
 
 func _process(delta: float) -> void:
 	if timer > 0:
+		timer_running = true
 		timer -= delta
+		timer_sync_timer -= delta
+		if timer_sync_timer < 0:
+			timer_sync_timer = TIMER_SYNC_DELAY
+			ping_start_time = Time.get_ticks_msec()
+			get_server_timer.rpc_id(1)
+	elif timer_running:
+		timer_finished.emit()
+		timer_running = false
+
+
+@rpc("authority", "unreliable", "call_remote")
+func give_server_timer(server_timer: float, start_time: int):
+	if start_time != ping_start_time:
+		return
+	var ping := Time.get_ticks_msec() - ping_start_time
+	timer = server_timer - ping / 1000.0
+
+
+@rpc("any_peer", "unreliable", "call_remote")
+func get_server_timer(start_time: int):
+	if !multiplayer.is_server():
+		push_error("Attempted to get server timer on %s" % multiplayer.get_unique_id())
+		return
+	give_server_timer.rpc_id(multiplayer.get_remote_sender_id(), timer, start_time)

@@ -28,7 +28,9 @@ func _ready() -> void:
 			$DesignatedJob.queue_free()
 	
 	await get_tree().create_timer(GameState.ROLE_TIME).timeout
-	Main.fade_change_scene(preload(\"res://src/game/bedroom/bedroom.tscn\").instantiate())
+	var bedroom: Bedroom = preload(\"res://src/game/bedroom/bedroom.tscn\").instantiate()
+	bedroom.modifiable = false
+	Main.fade_change_scene(bedroom)
 "
 
 [sub_resource type="LabelSettings" id="LabelSettings_m4hpe"]
