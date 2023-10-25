@@ -287,11 +287,12 @@ func _process(delta: float) -> void:
 	if timer > 0:
 		timer_running = true
 		timer -= delta
-		timer_sync_timer -= delta
-		if timer_sync_timer < 0:
-			timer_sync_timer = TIMER_SYNC_DELAY
-			ping_start_time = Time.get_ticks_msec()
-			get_server_timer.rpc_id(1)
+		if !multiplayer.is_server():
+			timer_sync_timer -= delta
+			if timer_sync_timer < 0:
+				timer_sync_timer = TIMER_SYNC_DELAY
+				ping_start_time = Time.get_ticks_msec()
+				get_server_timer.rpc_id(1, ping_start_time)
 	elif timer_running:
 		timer_finished.emit()
 		timer_running = false
